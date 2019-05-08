@@ -46,8 +46,8 @@ class SlackRtmClient private (token: String, slackApiBaseUri: Uri, duration: Fin
     handler
   }
 
-  def sendMessage(channelId: String, text: String, thread_ts: Option[String] = None): Future[Long] = {
-    (actor ? SendMessage(channelId, text, thread_ts)).mapTo[Long]
+  def sendMessage(channelId: String, text: String, thread_ts: Option[String] = None, replyBroadcast: Option[Boolean]= Some(false), attachments: Option[Seq[Attachment]] = None): Future[Long] = {
+    (actor ? SendMessage(channelId, text, thread_ts, replyBroadcast, attachments)).mapTo[Long]
   }
 
   def editMessage(channelId: String, ts: String, text: String) {
@@ -84,7 +84,7 @@ private[rtm] object SlackRtmConnectionActor {
 
   case class AddEventListener(listener: ActorRef)
   case class RemoveEventListener(listener: ActorRef)
-  case class SendMessage(channelId: String, text: String, ts_thread: Option[String] = None)
+  case class SendMessage(channelId: String, text: String, ts_thread: Option[String] = None, reply_broadcast: Option[Boolean] = Some(true), attachments: Option[Seq[Attachment]] = None)
   case class BotEditMessage(channelId: String,
                             ts: String,
                             text: String,
@@ -142,9 +142,9 @@ private[rtm] class SlackRtmConnectionActor(apiClient: BlockingSlackApiClient, st
       val nextId = idCounter.getAndIncrement
       val payload = Json.stringify(Json.toJson(MessageTyping(nextId, channelId)))
       webSocketClient.get ! SendWSMessage(TextMessage(payload))
-    case SendMessage(channelId, text, ts_thread) =>
+    case SendMessage(channelId, text, ts_thread, reply_broadcast, attachments) =>
       val nextId = idCounter.getAndIncrement
-      val payload = Json.stringify(Json.toJson(MessageSend(nextId, channelId, text, ts_thread)))
+      val payload = Json.stringify(Json.toJson(MessageSend(nextId, channelId, text, ts_thread, reply_broadcast, attachments)))
       webSocketClient.get ! SendWSMessage(TextMessage(payload))
       sender ! nextId
     case bm: BotEditMessage =>
@@ -216,6 +216,8 @@ private[rtm] case class MessageSend(id: Long,
                                     channel: String,
                                     text: String,
                                     thread_ts: Option[String] = None,
+                                    reply_broadcast: Option[Boolean] = Some(true),
+                                    attachments: Option[Seq[Attachment]] = None,
                                     `type`: String = "message")
 private[rtm] case class MessageTyping(id: Long, channel: String, `type`: String = "typing")
 private[rtm] case class Ping(id: Long, `type`: String = "ping")

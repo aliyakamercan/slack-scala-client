@@ -1,57 +1,25 @@
 import sbt._
 import Keys._
-import com.typesafe.sbt.SbtPgp.autoImport._
-import sbtrelease._
 
 object BuildSettings {
   val buildOrganization = "com.github.slack-scala-client"
-  val buildVersion      = "0.2.6"
-  val buildScalaVersion = "2.12.7"
+  val buildVersion      = "0.2.7"
+  val buildScalaVersion = "2.11.12"
   val buildCrossScalaVersions = Seq("2.11.12", "2.12.7")
 
   val settings = Seq (
     organization       := buildOrganization,
     version            := buildVersion,
     scalaVersion       := buildScalaVersion,
-    crossScalaVersions := buildCrossScalaVersions,
-    publishMavenStyle  := true,
-    credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
-    publishTo          := {
-      val nexus = "https://oss.sonatype.org/"
-      if (isSnapshot.value)
-        Some("snapshots" at nexus + "content/repositories/snapshots")
-      else
-        Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-    },
-    publishArtifact in Test := false,
-    pomIncludeRepository := { _ => false },
-    pomExtra := (
-      <url>https://github.com/slack-scala-client/slack-scala-client</url>
-      <licenses>
-        <license>
-          <name>MIT</name>
-          <url>https://opensource.org/licenses/MIT</url>
-          <distribution>repo</distribution>
-        </license>
-      </licenses>
-      <scm>
-        <url>git@github.com:slack-scala-client/slack-scala-client.git</url>
-        <connection>scm:git:git@github.com:slack-scala-client/slack-scala-client.git</connection>
-      </scm>
-      <developers>
-        <developer>
-          <id>gilbertw1</id>
-          <name>Bryan Gilbert</name>
-          <url>http://bryangilbert.com</url>
-        </developer>
-      </developers>)
+    crossScalaVersions := buildCrossScalaVersions
   )
 }
 
 object Dependencies {
-  val akkaActor = "com.typesafe.akka" %% "akka-actor" % "2.5.19"
+  val akkaVersion = "2.5.22"
+  val akkaActor = "com.typesafe.akka" %% "akka-actor" % akkaVersion
   val akkaHttp = "com.typesafe.akka" %% "akka-http-core" % "10.1.7"
-  val akkaStream = "com.typesafe.akka" %% "akka-stream" % "2.5.21"
+  val akkaStream = "com.typesafe.akka" %% "akka-stream" % akkaVersion
 
   val scalaAsync = "org.scala-lang.modules" %% "scala-async" % "0.9.7"
   val playJson = "com.typesafe.play" %% "play-json" % "2.7.1"

@@ -798,8 +798,8 @@ class SlackApiClient private (token: String, slackApiBaseUri: Uri) {
   private def makeApiJsonRequest(apiMethod: String, json: JsValue)(implicit system: ActorSystem): Future[JsValue] = {
     val req = addSegment(apiBaseRequest, apiMethod)
       .withMethod(HttpMethods.POST)
-      .withHeaders(ContentType.create(ContentTypes.`application/json`), Authorization(OAuth2BearerToken(token)))
-      .withEntity(json.toString())
+      .withHeaders(Authorization(OAuth2BearerToken(token)))
+      .withEntity(ContentTypes.`application/json`, json.toString())
     makeApiRequest(req)
   }
 }
